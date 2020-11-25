@@ -1,7 +1,7 @@
 
 import numpy as np
 
-import os
+import os, mne, re
 from datetime import datetime
 from mne.io import read_raw_edf
 from collections import defaultdict
@@ -11,7 +11,7 @@ import pandas as pd
 
 
 class dataloader:
-    def __init__(self,Time_interval,Overlap,Data_paht=None,freq=250):
+    def __init__(self,Time_interval,Overlap,Data_paht=None,freq=250,Chanels=None):
         """
         tWindow is how long each window is in seconds
         Overlap given as a float eg: 0.25 for 0.25% overlap
@@ -20,6 +20,12 @@ class dataloader:
         self.freq=freq
         self.tWindow=Time_interval
         self.Overlap=Overlap
+
+        if Chanels==None:
+            self.CH_names=['Fp1', 'Fp2', 'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2', 'F7', 'F8', 'T3', 'T4', 'T5','T6','Fz', 'Cz', 'Pz']
+        else:
+            self.CH_names=Chanels
+
 
         if Data_paht is None:
             self.DataDir=os.getcwd()
@@ -41,10 +47,19 @@ class dataloader:
         """
         Function to read the edf file in one given location.
         """
-        EEGseries= read_raw_edf(self.DataDir+"/"+edfDict["path"]+".edf", **read_raw_edf_param)
-        EEGseries.resample(sfreq=self.freq) #Down sample to desired frequense
+        #EEGseries= read_raw_edf(self.DataDir+"/"+edfDict["path"]+".edf", **read_raw_edf_param)
+        EEGseries=read_raw_edf(self.DataDir+"/"+edfDict["path"]+".edf",preload= True)
+        #EEGseries.plot()
+        EEGseries.resample(sfreq=self.freq)  # Down sample to desired frequense
+        EEGseries=self.TUHfooDef(EEGseries)
+        EEGseries.pick_channels(self.CH_names)
+        EEGseries.set_montage(mne.channels.make_standard_montage(kind="standard_1005", head_size=0.095), raise_if_subset=True)
+        print(EEGseries.info["ch_names"])
+        print(len(EEGseries.info["ch_names"]))
+        EEGseries.set_eeg_reference()
         edfDict["rawData"] =EEGseries
-        edfDict["Anotation"] = self.annoTUH(self.DataDir+"/"+edfDict["path"]+r".tse")
+        edfDict["Annotation"] = self.annoTUH(self.DataDir+"/"+edfDict["path"]+r".tse")
+        #EEGseries.plot()
 
         # comment this out to get meta data on recording time stamps, WARNING will given and error in python 3.7
         # tStart = edfDict["rawData"].annotations.orig_time-timedelta(hours=1)
@@ -52,10 +67,25 @@ class dataloader:
         # edfDict["t0"] = tStart
         # edfDict["tN"] = tStart + timedelta(seconds=tLast)
 
-        if self.freq != edfDict["rawData"].info["sfreq"]:
-            print(f"{edfDict['path']}  have a sampling frequens of {edfDict['rawData'].info['sfreq']}")
-            print("")
+        if self.CH_names != EEGseries.info["ch_names"]:
+            raise Exception(f"Montage Error")
         return edfDict
+
+    def TUHfooDef(self,EEGseries=False):
+        """
+        Gets the chanels reigt
+        """
+        for i in EEGseries.info["ch_names"]:
+            reSTR = r"(?<=EEG )(.*)(?=-REF)"
+            reLowC = ['FP1', 'FP2', 'FZ', 'CZ', 'PZ','T','A']
+            if re.search(reSTR, i) and re.search(reSTR, i).group() in reLowC:
+                lowC = i[0:5] + i[5].lower() + i[6:]
+                mne.channels.rename_channels(EEGseries.info, {i: re.findall(reSTR, lowC)[0]})
+            elif re.search(reSTR, i):
+                mne.channels.rename_channels(EEGseries.info, {i: re.findall(reSTR, i)[0]})
+            else:
+                print(i)
+        return EEGseries
 
     def annoTUH(self,annoPath=False, header=None):
         df = pd.read_csv(annoPath, sep=" ", skiprows=1, header=header)
@@ -94,7 +124,7 @@ class dataloader:
         Data["stepval"] = [t0,tWindow]
         Data["tval"] = [tStart,tWindow/self.freq]
         Data["X"] = EEGseries["rawData"].get_data(start=int(t0), stop=int(t0+tWindow))
-        df=EEGseries["Anotation"]
+        df=EEGseries["Annotation"]
         #Data["Y"]= df.loc[df[0].between(tStart, tEnd) | df[1].between(tStart, tEnd)][2]
         iStart=sum(df[0]<=tStart)-1
         iEnd=sum(df[1]<=tEnd)
