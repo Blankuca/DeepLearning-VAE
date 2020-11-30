@@ -32,9 +32,14 @@ class dataloader:
         else:
             self.DataDir=Data_paht
 
-    def loadDict(self,edfDict,index):
+    def loadDict(self,edfDict,index=[None]):
         windowDict = defaultdict()
-        for idx in index:
+        keys=edfDict.keys()
+        if index!=None:
+            keys=index
+        else:
+            keys = edfDict.keys()
+        for idx in keys:
             edfDict[idx] = self.readRawEdf(edfDict[idx])
             windowDict[idx] = self.slidingWindow(edfDict[idx])
         return windowDict
@@ -59,8 +64,11 @@ class dataloader:
     def loadFile(self,path):
         pass
 
-    def anno_mapping(self,edfDict):
-        keys=edfDict.keys()
+    def anno_mapping(self,edfDict,index=[None]):
+        if index!=None:
+            keys=index
+        else:
+            keys = edfDict.keys()
         annothlist=[[] for i in self.one_hot_eoncoding]
         lablelist=list(self.one_hot_eoncoding)
         for key in keys: #Go over each file.
@@ -68,7 +76,8 @@ class dataloader:
             tN=int(anno.iloc[-1,1]) #Get recording endtine
             t0=int(anno.iloc[0,0]) #Get startime
             file_overwiew=[]
-            for i,t in enumerate(range(t0, tN, self.tWindow*(1-self.Overlap))): #Go over the file.
+            step=int(self.freq*self.tWindow*(1-self.Overlap))/self.freq #atemt to alligne with slidinger window.
+            for i,t in enumerate(np.arange(t0, tN, step)): #Go over the file.
                 tEnd=t+self.tWindow
                 iStart = sum(anno[0] <= t) - 1
                 iEnd = sum(anno[1] <= tEnd)

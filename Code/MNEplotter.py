@@ -30,5 +30,22 @@ class MNEPlotter:
         fig.suptitle(f"window betwen {window['tval'][0]} and {window['tval'][1]}S, lable {lable}")
         plt.show()
 
+    def plot_raw(self,data,Y):
+        """
+        Plots a window if given in out dataformat
+        """
+
+        if self.decodeLable:
+            lable=self.decoding[Y==True]
+        else:
+            lable = Y
+
+        fig, axs=plt.subplots(len(self.CH_names),1,sharey=True,figsize=(6,20))
+        for n,CH in enumerate(self.CH_names):
+            axs[n].plot(data[n])
+            axs[n].set_ylabel(CH)
+        fig.suptitle(f"lable {lable}")
+        plt.show()
+
 
 
