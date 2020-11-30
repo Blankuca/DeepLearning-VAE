@@ -3,13 +3,45 @@ import numpy as np
 
 from Dataloader import dataloader
 from MakeDict import findEDF
+from MNEplotter import MNEPlotter
 
+
+def make_batch(IDXlist, size=24, Nlable=6):
+    """
+    make balance dataset, sampling with replacement.
+    """
+    filelist = []
+    windowlist = []
+
+    if size % Nlable != 0:
+        raise Exception(f"Batch size must be devedible by {Nlable}")
+    fromset = int(size / Nlable)
+
+    for i in range(Nlable):
+        elements = np.random.randint(0, len(IDXlist[i]), fromset)
+        for e in elements:
+            window = int(IDXlist[i][e][0])
+            try:  # See if window already is in list else append it
+                winidx = windowlist.index(window)
+                filelist[winidx].append(int(IDXlist[i][e][1]))
+            except ValueError:
+                windowlist.append(window)
+                filelist.append([int(IDXlist[i][e][1])])
+
+    return windowlist, filelist
 
 data_path=r"C:\Users\Andre\Desktop\Deeplearning local\artifact_dataset\artifact_dataset"
 path=r"artifact_dataset"
-idx=[22,77,88,122]
+idx=[22]
 edfDict=findEDF(DataDir=data_path)
+annoIDX=np.load('testIDX.npy',allow_pickle=True)
 loader=dataloader(Time_interval=1,Overlap=0,Data_paht=data_path)
-data=loader.loadDict(edfDict=edfDict,index=idx)
-print(data)
+#edfDict,annothlist=loader.anno_mapping(edfDict)
+
+#data=loader.loadDict(edfDict=edfDict,index=idx)
+windowslist,filelist=make_batch(IDXlist=annoIDX,size=24)
+
+Batch,Batch_X,Batch_Y=loader.loadBatch(edfDict=edfDict,windowlist=windowslist,filelist=filelist)
+pl=MNEPlotter(CH_names=loader.CH_names,lableEncoding=loader.one_hot_eoncoding)
+pl.plot(window=data[22]['window_13'])
 
