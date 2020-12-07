@@ -133,14 +133,30 @@ class dataloader:
         Gets the chanels reigt
         """
         for i in EEGseries.info["ch_names"]:
-            reSTR = r"(?<=EEG )(.*)(?=-REF)"
+            #Regular expretion to detect EGG "CH" -REF
+            reREF = r"(?<=EEG )(.*)(?=-REF)"
+
+            #Detect EEG -LE
+            reLE=r"(?<=EEG )(.*)(?=-LE)"
+
+            #Chanels where the seocnd letter need to be lower key.
             reLowC = ['FP1', 'FP2', 'FZ', 'CZ', 'PZ','T','A']
-            if re.search(reSTR, i) and re.search(reSTR, i).group() in reLowC:
+
+            #Clean chanel names -REF
+            if re.search(reREF, i) and re.search(reREF, i).group() in reLowC:
                 lowC = i[0:5] + i[5].lower() + i[6:]
-                mne.channels.rename_channels(EEGseries.info, {i: re.findall(reSTR, lowC)[0]})
-            elif re.search(reSTR, i):
-                mne.channels.rename_channels(EEGseries.info, {i: re.findall(reSTR, i)[0]})
+                mne.channels.rename_channels(EEGseries.info, {i: re.findall(reREF, lowC)[0]})
+            elif re.search(reREF, i):
+                mne.channels.rename_channels(EEGseries.info, {i: re.findall(reREF, i)[0]})
+
+            #Clean -Le
+            elif re.search(reLE, i) and re.search(reLE, i).group() in reLowC:
+                lowC = i[0:5] + i[5].lower() + i[6:]
+                mne.channels.rename_channels(EEGseries.info, {i: re.findall(reLE, lowC)[0]})
+            elif re.search(reLE, i):
+                mne.channels.rename_channels(EEGseries.info, {i: re.findall(reLE, i)[0]})
             else:
+                #print not clean channels
                 print(i)
         return EEGseries
 
