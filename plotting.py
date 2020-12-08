@@ -97,10 +97,8 @@ def plot_autoencoder_stats(
 
 
 def plot_samples(ax, x):
-    x = x.to('cpu')
-    nrow = int(np.sqrt(x.size(0)))
-    x_grid = make_grid(x.view(-1, 1, 28, 28), nrow=nrow).permute(1, 2, 0)
-    ax.imshow(x_grid)
+    for channel in x:
+        ax.plot(channel)
     ax.axis('off')
 
 
@@ -117,8 +115,7 @@ def plot_interpolations(ax, vae):
     px = vae.observation_model(zs.view(nrow * nsteps, -1))
     x = px.sample()
     x = x.to('cpu')
-    x_grid = make_grid(x.view(-1, 1, 28, 28), nrow=nrow).permute(1, 2, 0)
-    ax.imshow(x_grid)
+    ax.plot(x)
     ax.axis('off')
 
 
@@ -131,8 +128,7 @@ def plot_grid(ax, vae):
     px = vae.observation_model(zs.view(nrow * nrow, 2))
     x = px.sample()
     x = x.to('cpu')
-    x_grid = make_grid(x.view(-1, 1, 28, 28), nrow=nrow).permute(1, 2, 0)
-    ax.imshow(x_grid)
+    ax.imshow(x)
     ax.axis('off')
 
 
