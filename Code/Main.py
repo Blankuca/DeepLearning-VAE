@@ -1,9 +1,16 @@
 
 import numpy as np
 
+<<<<<<< Updated upstream
 from Dataloader import dataloader
 from MakeDict import findEDF
 from MNEplotter import MNEPlotter
+=======
+
+from MakeDict import findEDF
+from MNEplotter import MNEPlotter
+from Dataloader import dataloader
+>>>>>>> Stashed changes
 
 
 def make_batch(IDXlist, size=24, Nlable=6):
