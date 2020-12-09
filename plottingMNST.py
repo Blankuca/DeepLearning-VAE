@@ -11,11 +11,6 @@ from torch import Tensor
 from torch.distributions import Normal
 from torchvision.utils import make_grid
 
-def reshape(x):
-    original_shape = (19, 250)
-    if len(x.size())>1:
-        return x.view(x.shape[0],*original_shape)
-    return x.view(original_shape)
 
 def plot_autoencoder_stats(
         x: Tensor = None,
@@ -102,12 +97,10 @@ def plot_autoencoder_stats(
 
 
 def plot_samples(ax, x):
-    channels = 19
-    fig, axs = plt.subplots(channels,figsize=(6,20))
-    t = reshape(x)[0]
-
-    for i in range(channels):
-        axs[i].plot(t[i])
+    x = x.to('cpu')
+    nrow = int(np.sqrt(x.size(0)))
+    x_grid = make_grid(x.view(-1, 1, 28, 28), nrow=nrow).permute(1, 2, 0)
+    ax.imshow(x_grid)
     ax.axis('off')
 
 
