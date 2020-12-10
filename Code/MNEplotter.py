@@ -119,3 +119,51 @@ def plot_2d_latents(ax, outputs, y, tmp_img="tmp_vae_latent_space.png", show=Tru
     if show:
         display(Image(filename=tmp_img))
         clear_output(wait=True)
+
+
+def plot_batch(x, x_new=[None], y=[None],figsize=(12, 18), tmp_img="test_batchplot.png", show=True):
+    size, n_chanel, signal_len = x.shape
+
+    if y != [None]:
+        write_lable = True
+        decoding = ["null", "eyem", "chew", "shiv", "elpp", "musc"]
+    else:
+        write_lable = False
+
+    if x_new != [None]:
+        plot_new = True
+        fig, axis = plt.subplots(size, 2, figsize=figsize)
+    else:
+        plot_new = False
+        fig, axis = plt.subplots(size, 1, figsize=figsize)
+    for n in range(0, size):
+        if plot_new:
+
+            ax0 = axis[n, 0]
+            ax1 = axis[n, 1]
+            for CH in range(0, 19):
+                ax0.plot(x[n][CH])
+                ax1.plot(x_new[n][CH])
+            if write_lable:
+                ax0.set_ylabel(decoding[y[n]])
+
+            axis[0, 0].set_title("Opservation")
+            axis[0, 1].set_title("Reconstruction")
+        else:
+
+            ax = axis[n]
+            for CH in range(0, 19):
+                ax.plot(x[n][CH])
+            if write_lable:
+                ax.set_ylabel(decoding[y[n]])
+
+            # display
+    plt.tight_layout()
+    plt.savefig(tmp_img)
+    plt.close(fig)
+    if show:
+        display(Image(filename=tmp_img))
+        clear_output(wait=True)
+
+
+plot_batch(sample_x, x_new=untrained_samples, y=sample_y)

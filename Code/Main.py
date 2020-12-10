@@ -1,6 +1,6 @@
 
 import numpy as np
-
+"""
 <<<<<<< Updated upstream
 from Dataloader import dataloader
 from MakeDict import findEDF
@@ -11,7 +11,7 @@ from MakeDict import findEDF
 from MNEplotter import MNEPlotter
 from Dataloader import dataloader
 >>>>>>> Stashed changes
-
+"""
 
 def make_batch(IDXlist, size=24, Nlable=6):
     """
@@ -36,8 +36,9 @@ def make_batch(IDXlist, size=24, Nlable=6):
                 filelist.append([int(IDXlist[i][e][1])])
 
     return windowlist, filelist
+"""
 
-data_path=r"C:\Users\Andre\Desktop\Deeplearning local\artifact_dataset\artifact_dataset"
+data_path=r"C:\ Users\Andre\Desktop\Deeplearning local\ artifact_dataset\ artifact_dataset"
 path=r"artifact_dataset"
 idx=[0]
 edfDict=findEDF(DataDir=data_path)
@@ -53,4 +54,4 @@ windowslist,filelist=make_batch(IDXlist=annothlist,size=1,Nlable=1)
 Batch,Batch_X,Batch_Y=loader.loadBatch(edfDict=edfDict,windowlist=windowslist,filelist=filelist)
 pl=MNEPlotter(CH_names=loader.CH_names,lableEncoding=loader.one_hot_eoncoding)
 pl.plot_raw(Batch_X[0],Batch_Y[0])
-
+"""
