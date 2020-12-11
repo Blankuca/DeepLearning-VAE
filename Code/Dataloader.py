@@ -34,7 +34,7 @@ class dataloader:
 
     def loadDict(self,edfDict,index=[None]):
         windowDict = defaultdict()
-        keys=edfDict.keys()
+
         if index!=[None]:
             keys=index
         else:
@@ -65,7 +65,7 @@ class dataloader:
         pass
 
     def anno_mapping(self,edfDict,index=[None]):
-        if index!=None:
+        if index!=[None]:
             keys=index
         else:
             keys = edfDict.keys()
