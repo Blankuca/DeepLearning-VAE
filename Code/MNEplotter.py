@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import Image, display, clear_output
+import seaborn as sns
+sns.set_style("whitegrid")
+
 class MNEPlotter:
     def __init__(self,CH_names,lableEncoding=[None]):
         if lableEncoding.all==[None]:
@@ -81,7 +84,9 @@ def plot_AC(training_data, validation_data, tmp_img="tmp_vae_ac.png", show=True,
         clear_output(wait=True)
 
 
-def plot_2d_latents(ax, outputs, y, tmp_img="tmp_vae_latent_space.png", show=True):
+def plot_2d_latents(outputs, y, tmp_img="tmp_vae_latent_space.png", show=True):
+    fig, axes = plt.subplots(1, figsize=(10, 10), squeeze=False)
+                     
     z = outputs['z']
     qz = outputs['qz']
     z = z.to('cpu')
@@ -93,7 +98,7 @@ def plot_2d_latents(ax, outputs, y, tmp_img="tmp_vae_latent_space.png", show=Tru
 
     # plot prior
     prior = plt.Circle((0, 0), scale_factor, color='gray', fill=True, alpha=0.1)
-    ax.add_artist(prior)
+    axes[0,0].add_artist(prior)
 
     # plot data points
     mus, sigmas = qz.mu.to('cpu'), qz.sigma.to('cpu')
@@ -104,13 +109,13 @@ def plot_2d_latents(ax, outputs, y, tmp_img="tmp_vae_latent_space.png", show=Tru
         plt.matplotlib.patches.Ellipse(mus[i], *(scale_factor * s for s in sigmas[i]), color=colors[i], fill=False,
                                        alpha=0.3) for i in range(batch_size)]
     for p in posteriors:
-        ax.add_artist(p)
+        axes[0,0].add_artist(p)
 
-    ax.scatter(z[:, 0], z[:, 1], color=colors)
+    axes[0,0].scatter(z[:, 0], z[:, 1], color=colors)
 
-    ax.set_xlim([-3, 3])
-    ax.set_ylim([-3, 3])
-    ax.set_aspect('equal', 'box')
+    axes[0,0].set_xlim([-3, 3])
+    axes[0,0].set_ylim([-3, 3])
+    axes[0,0].set_aspect('equal', 'box')
 
     # display
     plt.tight_layout()
@@ -166,4 +171,4 @@ def plot_batch(x, x_new=[None], y=[None],figsize=(12, 18), tmp_img="test_batchpl
         clear_output(wait=True)
 
 
-plot_batch(sample_x, x_new=untrained_samples, y=sample_y)
+#plot_batch(sample_x, x_new=untrained_samples, y=sample_y)
