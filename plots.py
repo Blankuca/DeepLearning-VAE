@@ -37,13 +37,12 @@ def plot_nll(training_data,validation_data):
     
 def plot_samples(x, title):
     channels = 19
-    fig, axs = plt.subplots(channels,figsize=(6,20))
-    t = reshape(x)[0]
+    fig, axs = plt.subplots(channels,figsize=(8,22))
+    t = x[0]
     plt.title(title)
 
     for i in range(channels):
         axs[i].plot(t[i])
-    ax.axis('off')
     
 def plot_posteriors(outputs):
     # plot posterior samples
@@ -53,7 +52,7 @@ def plot_posteriors(outputs):
     x_sample = px.sample().to('cpu')
     plot_samples(x_sample, title)
     
-def plot_prior(vae):   
+def plot_prior(vae,x):   
     # plot prior samples
     title='Samples $\mathbf{x} \sim p_\theta(\mathbf{x} | \mathbf{z}), \mathbf{z} \sim p(\mathbf{z})$'
     px = vae.sample_from_prior(batch_size=x.size(0))['px']
