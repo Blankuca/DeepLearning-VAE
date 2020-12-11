@@ -35,7 +35,7 @@ class dataloader:
     def loadDict(self,edfDict,index=[None]):
         windowDict = defaultdict()
         keys=edfDict.keys()
-        if index!=None:
+        if index!=[None]:
             keys=index
         else:
             keys = edfDict.keys()
@@ -105,14 +105,14 @@ class dataloader:
         Function to read the edf file in one given location.
         """
         #EEGseries= read_raw_edf(self.DataDir+"/"+edfDict["path"]+".edf", **read_raw_edf_param)
-        EEGseries=read_raw_edf(self.DataDir+"/"+edfDict["path"]+".edf",preload= True)
+        EEGseries=read_raw_edf(self.DataDir+"/"+edfDict["path"]+".edf",preload= True,verbose="WARNING")
         #EEGseries.plot()
         EEGseries.resample(sfreq=self.freq)  # Down sample to desired frequense
         EEGseries=self.TUHfooDef(EEGseries)
         EEGseries.pick_channels(self.CH_names)
         EEGseries.set_montage(mne.channels.make_standard_montage(kind="standard_1005", head_size=0.095))
-        print(EEGseries.info["ch_names"])
-        print(len(EEGseries.info["ch_names"]))
+        #print(EEGseries.info["ch_names"])
+        #print(len(EEGseries.info["ch_names"]))
         EEGseries.set_eeg_reference() #Using avage as reference 
         edfDict["rawData"] =EEGseries
         edfDict["Annotation"] = self.annoTUH(self.DataDir+"/"+edfDict["path"]+r".tse")
@@ -156,8 +156,9 @@ class dataloader:
             elif re.search(reLE, i):
                 mne.channels.rename_channels(EEGseries.info, {i: re.findall(reLE, i)[0]})
             else:
+                pass
                 #print not clean channels
-                print(i)
+                #print(i)
         return EEGseries
 
     def annoTUH(self,annoPath=False, header=None):
