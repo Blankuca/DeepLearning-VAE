@@ -7,7 +7,7 @@ from mne.io import read_raw_edf
 from collections import defaultdict
 path=os.path.join(os.getcwd(),r"Data\s007_2012_07_25\00001154_s007_t000")
 import pandas as pd
-
+import pickle
 
 
 class dataloader:
@@ -213,6 +213,65 @@ class dataloader:
         if np.sum(Data["Y"]) !=1:
             raise Exception("To few or to many labels.")
         return Data
+
+class preprossing(dataloader):
+    def auto_dataset(self,edfDict,class_size,file_name):
+        edfDict,annothlist=self.anno_mapping(edfDict)
+#        annothlist=np.load('testIDX.npy', allow_pickle=True)
+        windowlist, filelist=self.make_batch(annothlist,class_size)
+        batch,x,y=self.loadBatch(edfDict,windowlist,filelist)
+        self.save_batch(batch,file_name)
+    def save_batch(self,batch,file_name):
+        pickle.dump(batch,open(file_name,'wb'))
+
+    def make_batch(self,IDXlist, size_per_class=24, Nlable=6,replace=False):
+        """
+        make balance dataset, sampling with replacement.
+        """
+        filelist = []
+        windowlist = []
+
+        if size_per_class=="min":
+            size_per_class=np.min([len(IDXlist[i]) for i in range(Nlable)])
+
+        for i in range(Nlable):
+            elements = np.random.choice(len(IDXlist[i]),size_per_class, replace=replace)
+            for e in elements:
+                window = int(IDXlist[i][e][0])
+                try:  # See if window already is in list else append it
+                    winidx = windowlist.index(window)
+                    filelist[winidx].append(int(IDXlist[i][e][1]))
+                except ValueError:
+                    windowlist.append(window)
+                    filelist.append([int(IDXlist[i][e][1])])
+
+        return windowlist, filelist
+
+class batch_loader():
+    def __init__(self,path):
+        self.path=path
+        self.pre_loaded=False
+
+    def pre_load(self):
+        self.pre_loaded=True
+        self.data=pickle.load(open(self.path,'rb'))
+        self.data_size=len(self.data.keys())
+        self.lable_list=[]
+        for n in range(self.data_size):
+            self.lable_list.append(np.argmax(self.data[n]['Y']))
+
+
+    def load(self,idx):
+        X=[]
+        Y=[]
+        if self.pre_loaded:
+            for key in idx:
+                X.append(self.data[key]['X'])
+                Y.append(self.data[key]['Y'])
+
+        return X,Y
+
+
 
 #loader=dataloader(Time_interval=1,Overlap=0)
 #edfdict={"path": path}
