@@ -267,7 +267,7 @@ class batch_loader():
         if self.pre_loaded:
             for key in idx:
                 X.append(self.data[key]['X'])
-                Y.append(self.data[key]['X'])
+                Y.append(self.data[key]['Y'])
 
         return X,Y
 
