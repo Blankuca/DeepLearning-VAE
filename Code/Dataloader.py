@@ -65,7 +65,7 @@ class dataloader:
         pass
 
     def anno_mapping(self,edfDict,index=[None]):
-        if index!=None:
+        if index!=[None]:
             keys=index
         else:
             keys = edfDict.keys()
@@ -221,6 +221,8 @@ class preprossing(dataloader):
         windowlist, filelist=self.make_batch(annothlist,class_size)
         batch,x,y=self.loadBatch(edfDict,windowlist,filelist)
         self.save_batch(batch,file_name)
+
+
     def save_batch(self,batch,file_name):
         pickle.dump(batch,open(file_name,'wb'))
 
@@ -267,7 +269,7 @@ class batch_loader():
         if self.pre_loaded:
             for key in idx:
                 X.append(self.data[key]['X'])
-                Y.append(self.data[key]['X'])
+                Y.append(self.data[key]['Y'])
 
         return X,Y
 
